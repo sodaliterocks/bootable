@@ -1,0 +1,9 @@
+# Runtime
+build/*
+
+# Temporary
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
