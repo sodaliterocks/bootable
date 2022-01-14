@@ -81,16 +81,14 @@ exec lorax --product=$iso_product \
             --add-template-var=ostree_oskey=$iso_ostree_oskey \
             --add-template-var=ostree_install_ref=$iso_ostree_ref_install \
             --add-template-var=ostree_update_ref=$iso_ostree_ref_update \
+            --add-template=$base_dir/lib/fedora-lorax-templates/ostree-based-installer/lorax-embed-flatpaks.tmpl \
+            --add-template-var=flatpak_remote_name="AppCenter" \
+            --add-template-var=flatpak_remote_url=https://flatpak.elementary.io/repo.flatpakrepo \
+            --add-template-var=flatpak_remote_refs="runtime/io.elementary.Platform/x86_64/6.1 app/org.gnome.Evince/x86_64/stable app/org.gnome.FileRoller/x86_64/stable" \
             --logfile=$working_dir/lorax.log \
             --tmp=$working_dir/tmp \
             --rootfs-size=8 \
             $working_dir/output
-
-            # BUG: Fails with "Can't check signature: public key not found"
-            #--add-template=$base_dir/lib/fedora-lorax-templates/ostree-based-installer/lorax-embed-flatpaks.tmpl \
-            #--add-template-var=flatpak_remote_name="AppCenter" \
-            #--add-template-var=flatpak_remote_url=https://flatpak.elementary.io/repo/ \
-            #--add-template-var=flatpak_remote_refs="io.elementary.Platform/x86_64/6.1" \
 
 echoc "$(write_emoji "🛡️")Correcting permissions for build directory..."
 real_user=$(get_sudo_user)
