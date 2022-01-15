@@ -12,35 +12,60 @@ function update_submodules() {
         echoc "$(write_emoji "🔄")Updating submodules..."
         git -C $dir submodule update --recursive
     else
-        echoc "$(write_emoji "⬇️")Pulling submodules..."
+        echoc "$(write_emoji "⬇️")Initializing submodules..."
         git -C $dir submodule update --init --recursive
     fi
 }
 
 base_dir="$(dirname "$(realpath -s "$0")")"
-variant=$1
-working_dir=$2
-ostree_repo=$3
+ostree_repo=$1
+variant=$2
+working_dir=$3
 
 [[ -z $variant ]] && variant="custom"
 [[ -z $working_dir ]] && working_dir="$base_dir/build"
-[[ -z $ostree_repo ]] && ostree_repo="$base_dir/lib/sodaliterocks.sodalite/build/repo"
 
 update_submodules $base_dir
-update_submodules "$base_dir/lib/sodaliterocks.sodalite"
-
-if [[ -d $ostree_repo ]]; then
-    ostree summary -v --repo "$ostree_repo" > /dev/null 2>&1
-    if [[ $? != 0 ]]; then
-        echoc error "Not an OSTree repository ($ostree_repo)"
-        exit
-    fi
-else
-    echoc error "OSTree repository does not exist ($ostree_repo)"
-    exit
-fi
 
 test_root
+
+if [[ -z $ostree_repo ]]; then
+    # Let's see if we can find a repo!
+    declare -a possible_repo_name=(
+        "sodalite"
+        "electricduck.sodalite"
+        "sodaliterocks.sodalite"
+    )
+
+    for i in "${possible_repo_name[@]}"
+    do
+        possible_repo_location="$base_dir/../$i/build/repo"
+        if [[ -d $possible_repo_location ]]; then
+            if [[ "$(ls -A $possible_repo_location)" ]]; then
+                possible_repo_location=$(realpath -s $possible_repo_location)
+                if [[ $(get_answer "Found OSTree repository at '$possible_repo_location'. Use?") == true ]]; then
+                    ostree_repo=$possible_repo_location
+                fi
+            fi
+        fi
+    done
+fi
+
+if [[ -z $ostree_repo ]]; then
+    echoc error "OSTree repository path required (\$1)"
+    exit
+else
+    if [[ -d $ostree_repo ]]; then
+        ostree summary -v --repo "$ostree_repo" > /dev/null 2>&1
+        if [[ $? != 0 ]]; then
+            echoc error "Not an OSTree repository ($ostree_repo)"
+            exit
+        fi
+    else
+        echoc error "OSTree repository does not exist ($ostree_repo)"
+        exit
+    fi
+fi
 
 if [[ -d $working_dir ]]; then
     echoc "$(write_emoji "🗑️")Removing old build..."
