@@ -3,7 +3,7 @@
 # Massive props to ACertainTopfi for the initial work to get this going!
 # (https://github.com/electricduck/sodalite/pull/10)
 
-. "$(dirname "$(realpath -s "$0")")/lib/sodaliterocks.sodalite/src/include/tools/common.sh"
+. "$(dirname "$(realpath -s "$0")")/lib/sodaliterocks.common/bash/common.sh"
 
 function update_submodules() {
     dir="$1"
