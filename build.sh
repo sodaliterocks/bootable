@@ -75,8 +75,7 @@ exec lorax  --product=$iso_product \
             --add-template-var=flatpak_remote_name_2=flathub \
             --add-template-var=flatpak_remote_url_2=https://flathub.org/repo/flathub.flatpakrepo \
             --add-template-var=flatpak_remote_refs_2="runtime/org.freedesktop.Platform.GL.default/x86_64/21.08" \
-            --add-template-var=runcmd="flatpak remote-add --system appcenter https://flatpak.elementary.io/repo.flatpakrepo" \
-            --add-template-var=runcmd="flatpak remote-add --system flathub https://flathub.org/repo/flathub.flatpakrepo" \
+            --add-template-var=runcmd="flatpak remote-add --system appcenter https://flatpak.elementary.io/repo.flatpakrepo && flatpak remote-add --system flathub https://flathub.org/repo/flathub.flatpakrepo && rpm-ostree initramfs --enable" \
             --logfile=$working_dir/lorax.log \
             --tmp=$working_dir/tmp \
             --rootfs-size=8 \
