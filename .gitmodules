@@ -1,7 +1,3 @@
-[submodule "lib/fedora-lorax-templates"]
-	path = lib/fedora-lorax-templates
-	url = https://pagure.io/fedora-lorax-templates.git
-	branch = f35
 [submodule "lib/sodaliterocks.common"]
 	path = lib/sodaliterocks.common
 	url = https://github.com/sodaliterocks/common
