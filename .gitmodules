@@ -1,3 +1,6 @@
 [submodule "lib/sodaliterocks.common"]
 	path = lib/sodaliterocks.common
 	url = https://github.com/sodaliterocks/common
+[submodule "lib/fedora-lorax-templates"]
+	path = lib/fedora-lorax-templates
+	url = https://github.com/sodaliterocks/fedora-lorax-templates
