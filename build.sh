@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-# Massive props to ACertainTopfi for the initial work to get this going!
-# (https://github.com/electricduck/sodalite/pull/10)
-
 . "$(dirname "$(realpath -s "$0")")/lib/sodaliterocks.common/bash/common.sh"
 
 function update_submodules() {
@@ -22,50 +19,12 @@ ostree_repo=$1
 variant=$2
 working_dir=$3
 
-[[ -z $variant ]] && variant="custom"
+[[ -z $variant ]] && variant="base"
 [[ -z $working_dir ]] && working_dir="$base_dir/build"
 
 update_submodules $base_dir
 
 test_root
-
-if [[ -z $ostree_repo ]]; then
-    # Let's see if we can find a repo!
-    declare -a possible_repo_name=(
-        "sodalite"
-        "electricduck.sodalite"
-        "sodaliterocks.sodalite"
-    )
-
-    for i in "${possible_repo_name[@]}"
-    do
-        possible_repo_location="$base_dir/../$i/build/repo"
-        if [[ -d $possible_repo_location ]]; then
-            if [[ "$(ls -A $possible_repo_location)" ]]; then
-                possible_repo_location=$(realpath -s $possible_repo_location)
-                if [[ $(get_answer "Found OSTree repository at '$possible_repo_location'. Use?") == true ]]; then
-                    ostree_repo=$possible_repo_location
-                fi
-            fi
-        fi
-    done
-fi
-
-if [[ -z $ostree_repo ]]; then
-    echoc error "OSTree repository path required (\$1)"
-    exit
-else
-    if [[ -d $ostree_repo ]]; then
-        ostree summary -v --repo "$ostree_repo" > /dev/null 2>&1
-        if [[ $? != 0 ]]; then
-            echoc error "Not an OSTree repository ($ostree_repo)"
-            exit
-        fi
-    else
-        echoc error "OSTree repository does not exist ($ostree_repo)"
-        exit
-    fi
-fi
 
 if [[ -d $working_dir ]]; then
     echoc "$(write_emoji "🗑️")Removing old build..."
@@ -78,38 +37,46 @@ mkdir -p $working_dir
 chown -R root:root $working_dir
 cd $working_dir
 
-iso_product="Sodalite"
-iso_version="stable" # TODO: Get this from the OSTree build
-iso_version_base="35" # TODO: Get this from the OSTree build
+iso_product=Sodalite
+iso_version=stable # TODO: Get this from the OSTree build
+iso_version_base=rawhide # TODO: Get this from the OSTree build
 iso_version_release="$(date +"%Y%m%d")"
 iso_variant=$variant # TODO: Get this from the OSTree build
-iso_arch="x86_64" # TODO: Get this from the OSTree build
-iso_ostree_oskey="${iso_product,,}-$iso_version_base-${iso_variant,,}"
-iso_ostree_repo_install=$ostree_repo
-iso_ostree_repo_update="https://ostree.zio.sh/repo"
-iso_ostree_ref_install="sodalite/stable/x86_64/$variant" # TODO: Get this from the OSTree build
+iso_arch=x86_64 # TODO: Get this from the OSTree build
+iso_ostree_oskey=${iso_product,,}-$iso_version_base-${iso_variant,,}
+iso_ostree_repo_install=https://ostree.zio.sh/repo
+iso_ostree_repo_update=$iso_ostree_repo_install
+iso_ostree_ref_install=sodalite/stable/x86_64/$variant # TODO: Get this from the OSTree build
 iso_ostree_ref_update=$iso_ostree_ref_install
+config_template=$base_dir/lib/fedora-lorax-templates/ostree-based-installer/lorax-configure-repo.tmpl
+repo_template=$base_dir/lib/fedora-lorax-templates/ostree-based-installer/lorax-embed-repo.tmpl
+flatpak_template=$base_dir/lib/fedora-lorax-templates/ostree-based-installer/lorax-embed-flatpaks.tmpl
 
 echoc "$(write_emoji "📀")Building ISO (this will take a while)..."
-exec lorax --product=$iso_product \
+exec lorax  --product=$iso_product \
             --version=$iso_version_base \
-            --source=https://kojipkgs.fedoraproject.org/compose/$iso_version_base/latest-Fedora-$iso_version_base/compose/Everything/$iso_arch/os/ \
+            --source=https://kojipkgs.fedoraproject.org/compose/$iso_version_base/latest-Fedora-Rawhide/compose/Everything/$iso_arch/os/ \
             --variant=$iso_variant \
-		    --release=$iso_release \
+            --release=$iso_version_release \
             --nomacboot \
-            --volid="$iso_product-$iso_arch-$iso_version_base-$iso_release" \
-            --add-template=$base_dir/lib/fedora-lorax-templates/ostree-based-installer/lorax-configure-repo.tmpl \
-            --add-template=$base_dir/lib/fedora-lorax-templates/ostree-based-installer/lorax-embed-repo.tmpl \
-            --add-template-var=ostree_install_repo=file://$iso_ostree_repo_install \
+            --volid="$iso_product-$iso_arch-$iso_version_base-$iso_version_release" \
+            --add-template=$config_template \
+            --add-template=$repo_template \
+            --add-template=$flatpak_template \
+            --add-template-var=ostree_install_repo=$iso_ostree_repo_install \
             --add-template-var=ostree_update_repo=$iso_ostree_repo_update \
             --add-template-var=ostree_osname=fedora \
             --add-template-var=ostree_oskey=$iso_ostree_oskey \
             --add-template-var=ostree_install_ref=$iso_ostree_ref_install \
             --add-template-var=ostree_update_ref=$iso_ostree_ref_update \
-            --add-template=$base_dir/lib/fedora-lorax-templates/ostree-based-installer/lorax-embed-flatpaks.tmpl \
-            --add-template-var=flatpak_remote_name="AppCenter" \
-            --add-template-var=flatpak_remote_url=https://flatpak.elementary.io/repo.flatpakrepo \
-            --add-template-var=flatpak_remote_refs="runtime/io.elementary.Platform/x86_64/6.1 app/org.gnome.Evince/x86_64/stable app/org.gnome.FileRoller/x86_64/stable" \
+            --add-template-var=flatpak_remote_name_1=appcenter \
+            --add-template-var=flatpak_remote_url_1=https://flatpak.elementary.io/repo.flatpakrepo \
+            --add-template-var=flatpak_remote_refs_1="runtime/io.elementary.Platform/x86_64/6.1 app/org.gnome.Epiphany/x86_64/stable app/org.gnome.Evince/x86_64/stable app/org.gnome.FileRoller/x86_64/stable" \
+            --add-template-var=flatpak_remote_name_2=flathub \
+            --add-template-var=flatpak_remote_url_2=https://flathub.org/repo/flathub.flatpakrepo \
+            --add-template-var=flatpak_remote_refs_2="runtime/org.freedesktop.Platform.GL.default/x86_64/21.08" \
+            --add-template-var=runcmd="flatpak remote-add --system appcenter https://flatpak.elementary.io/repo.flatpakrepo" \
+            --add-template-var=runcmd="flatpak remote-add --system flathub https://flathub.org/repo/flathub.flatpakrepo" \
             --logfile=$working_dir/lorax.log \
             --tmp=$working_dir/tmp \
             --rootfs-size=8 \
