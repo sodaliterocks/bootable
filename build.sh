@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Usage: ./build.sh [variant] [ostree-repo] [working-dir]
 
 . "$(dirname "$(realpath -s "$0")")/lib/sodaliterocks.common/bash/common.sh"
 
@@ -15,8 +16,8 @@ function update_submodules() {
 }
 
 base_dir="$(dirname "$(realpath -s "$0")")"
-ostree_repo=$1
-variant=$2
+variant=$1
+ostree_repo=$2
 working_dir=$3
 
 [[ -z $variant ]] && variant="base"
