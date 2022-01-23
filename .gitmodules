@@ -4,3 +4,5 @@
 [submodule "lib/fedora-lorax-templates"]
 	path = lib/fedora-lorax-templates
 	url = https://github.com/sodaliterocks/fedora-lorax-templates
+[submodule "lib/fedora-lorax-templates/"]
+	branch = main
