@@ -51,7 +51,9 @@ iso_ostree_ref_install=sodalite/stable/x86_64/$variant # TODO: Get this from the
 iso_ostree_ref_update=$iso_ostree_ref_install
 config_template=$base_dir/lib/fedora-lorax-templates/ostree-based-installer/lorax-configure-repo.tmpl
 repo_template=$base_dir/lib/fedora-lorax-templates/ostree-based-installer/lorax-embed-repo.tmpl
-flatpak_template=$base_dir/lib/fedora-lorax-templates/ostree-based-installer/lorax-embed-flatpaks.tmpl
+flatpak_template_1=$base_dir/lib/fedora-lorax-templates/ostree-based-installer/lorax-embed-flatpaks_1.tmpl
+flatpak_template_2=$base_dir/lib/fedora-lorax-templates/ostree-based-installer/lorax-embed-flatpaks_2.tmpl
+runcmd=$base_dir/lib/fedora-lorax-templates/ostree-based-installer/runcmd.tmpl
 
 echoc "$(write_emoji "📀")Building ISO (this will take a while)..."
 exec lorax  --product=$iso_product \
@@ -63,7 +65,9 @@ exec lorax  --product=$iso_product \
             --volid="$iso_product-$iso_arch-$iso_version_base-$iso_version_release" \
             --add-template=$config_template \
             --add-template=$repo_template \
-            --add-template=$flatpak_template \
+            --add-template=$flatpak_template_2 \
+            --add-template=$flatpak_template_1 \
+            --add-template=$runcmd \
             --add-template-var=ostree_install_repo=$iso_ostree_repo_install \
             --add-template-var=ostree_update_repo=$iso_ostree_repo_update \
             --add-template-var=ostree_osname=fedora \
@@ -76,7 +80,7 @@ exec lorax  --product=$iso_product \
             --add-template-var=flatpak_remote_name_2=flathub \
             --add-template-var=flatpak_remote_url_2=https://flathub.org/repo/flathub.flatpakrepo \
             --add-template-var=flatpak_remote_refs_2="runtime/org.freedesktop.Platform.GL.default/x86_64/21.08" \
-            --add-template-var=runcmd="flatpak remote-add --system appcenter https://flatpak.elementary.io/repo.flatpakrepo && flatpak remote-add --system flathub https://flathub.org/repo/flathub.flatpakrepo && rpm-ostree initramfs --enable" \
+            --add-template-var=cmd_1="rpm-ostree initramfs --enable" \
             --logfile=$working_dir/lorax.log \
             --tmp=$working_dir/tmp \
             --rootfs-size=8 \
