@@ -45,7 +45,7 @@ iso_version_release="$(date +"%Y%m%d")"
 iso_variant=$variant # TODO: Get this from the OSTree build
 iso_arch=x86_64 # TODO: Get this from the OSTree build
 iso_ostree_oskey=${iso_product,,}-$iso_version_base-${iso_variant,,}
-iso_ostree_repo_install=https://ostree.zio.sh/repo
+iso_ostree_repo_install=https://ostree.sodalite.rocks/
 iso_ostree_repo_update=$iso_ostree_repo_install
 iso_ostree_ref_install=sodalite/stable/x86_64/$variant # TODO: Get this from the OSTree build
 iso_ostree_ref_update=$iso_ostree_ref_install
@@ -80,7 +80,7 @@ exec lorax  --product=$iso_product \
             --add-template-var=flatpak_remote_name_2=flathub \
             --add-template-var=flatpak_remote_url_2=https://flathub.org/repo/flathub.flatpakrepo \
             --add-template-var=flatpak_remote_refs_2="runtime/org.freedesktop.Platform.GL.default/x86_64/21.08" \
-            --add-template-var=cmd_1="rpm-ostree initramfs --enable" \
+            --add-template-var=cmd="rpm-ostree initramfs --enable" \
             --logfile=$working_dir/lorax.log \
             --tmp=$working_dir/tmp \
             --rootfs-size=8 \
